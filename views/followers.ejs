@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/css/style.css" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= user.username %>'s Followers | arcades4friends</title>
+</head>
+<body>
+  <h1 class = "follow-header"><%= user.username %>'s Followers:</h1>
+
+  <% if (user.followers.length === 0) { %>
+   <p>No Followers</p>
+  <% } else { %>
+  <ul>
+    <% for( const follower of user.followers) { %>
+      <li>
+        <p>- <a href="/users/<%= follower.requestUserId %>"><%= follower.requestUsername %></a></p>
+      </li>
+    <% } %>
+  </ul>
+  <% } %>
+
+</body>
+</html>
