@@ -43,6 +43,15 @@ async function getUserByUsername(username: string): Promise<User | null> {
   return user;
 }
 
+async function updateEmailAddress(userId: string, newEmail: string): Promise<void> {
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ email: newEmail })
+    .where({ userId })
+    .execute();
+}
+
 async function deleteUserById(userId: string): Promise<void> {
   await userRepository
     .createQueryBuilder('user')
@@ -61,6 +70,7 @@ export {
   getUserByEmail,
   getUserById,
   getUserByUsername,
+  updateEmailAddress,
   deleteUserById,
   deleteAllUsers,
 };

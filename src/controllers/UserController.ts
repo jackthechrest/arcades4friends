@@ -5,11 +5,11 @@ import {
   addUser,
   getUserByEmail,
   getUserById,
-  getUserByUsername,
   allUserData,
   updateEmailAddress,
   deleteUserById,
   deleteAllUsers,
+  getUserByUsername,
 } from '../models/UserModel';
 import { parseDatabaseError } from '../utils/db-utils';
 import { sendEmail } from '../services/emailService';
@@ -29,8 +29,8 @@ async function registerUser(req: Request, res: Response): Promise<void> {
     await addUser(username, email, passwordHash);
     await sendEmail(
       email,
-      'Welcome!',
-      `You have successfully created your account in Venus Frame!`
+      'Welcome to arcades4friends!',
+      `Your account has successfully been created, enjoy!`
     );
     res.redirect('/login');
   } catch (err) {
@@ -95,7 +95,50 @@ async function logIn(req: Request, res: Response): Promise<void> {
     username: user.username,
   };
   req.session.isLoggedIn = true;
-  res.redirect('/users/PreviewPage');
+  res.redirect('/users/menu');
+}
+
+async function findUser(req: Request, res: Response): Promise<void> {
+  const { username } = req.body;
+
+  const user = await getUserByUsername(username);
+
+  if (!user) {
+    res.redirect('/search');
+    return;
+  }
+
+  res.redirect(`/users/${user.userId}`);
+}
+
+async function renderMenu(req: Request, res: Response): Promise<void> {
+  const { authenticatedUser } = req.session;
+  const user = await getUserById(authenticatedUser.userId);
+
+  res.render('menu', { user });
+}
+
+async function getUserProfileData(req: Request, res: Response): Promise<void> {
+  const { targetUserId } = req.params as UserIdParam;
+
+  // Get the user account
+  const user = await getUserById(targetUserId);
+
+  if (!user) {
+    res.redirect('/login'); // 404 Not Found
+    return;
+  }
+
+  const { isLoggedIn, authenticatedUser } = req.session;
+  const viewingUser = await getUserById(authenticatedUser.userId);
+  const targetFollow = await getFollowById(user.userId + viewingUser.userId);
+
+  res.render('profile', {
+    user,
+    authenticatedId: viewingUser.userId,
+    loggedIn: isLoggedIn,
+    following: targetFollow,
+  });
 }
 
 async function updateUserEmail(req: Request, res: Response): Promise<void> {
@@ -176,6 +219,9 @@ export {
   getAllUserProfiles,
   registerUser,
   logIn,
+  findUser,
+  renderMenu,
+  getUserProfileData,
   updateUserEmail,
   deleteAccount,
   deleteAllAccounts,
