@@ -93,6 +93,7 @@ async function logIn(req: Request, res: Response): Promise<void> {
   req.session.authenticatedUser = {
     userId: user.userId,
     username: user.username,
+    isOperator: user.isOperator,
   };
   req.session.isLoggedIn = true;
   res.redirect('/users/menu');
@@ -139,6 +140,24 @@ async function getUserProfileData(req: Request, res: Response): Promise<void> {
     loggedIn: isLoggedIn,
     following: targetFollow,
   });
+}
+
+async function verifyEmail(req: Request, res: Response): Promise<void> {
+  const { authenticatedUser, isLoggedIn } = req.session;
+  const { targetedUserId } = req.params;
+
+  if (!isLoggedIn) {
+    res.redirect('/login');
+    return;
+  }
+
+  if (authenticatedUser.userId !== targetedUserId) {
+    res.redirect('/users/menu');
+    return;
+  }
+
+  // code to send an email for verification
+  console.log('test');
 }
 
 async function updateUserEmail(req: Request, res: Response): Promise<void> {
@@ -222,6 +241,7 @@ export {
   findUser,
   renderMenu,
   getUserProfileData,
+  verifyEmail,
   updateUserEmail,
   deleteAccount,
   deleteAllAccounts,

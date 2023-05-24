@@ -43,6 +43,15 @@ async function getUserByUsername(username: string): Promise<User | null> {
   return user;
 }
 
+async function updateEmailVerification(userId: string, verificationStatus: boolean): Promise<void> {
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ verifiedEmail: verificationStatus })
+    .where({ userId })
+    .execute();
+}
+
 async function updateEmailAddress(userId: string, newEmail: string): Promise<void> {
   await userRepository
     .createQueryBuilder()
@@ -50,6 +59,40 @@ async function updateEmailAddress(userId: string, newEmail: string): Promise<voi
     .set({ email: newEmail })
     .where({ userId })
     .execute();
+}
+
+async function awardXp(userId: string, xpAwarded: number): Promise<User> {
+  let user = await getUserById(userId);
+  const xpNeededToLevelUp = user.level * 100;
+  const newExperience = user.experiencePoints + xpAwarded;
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ experiencePoints: newExperience })
+    .where({ userId })
+    .execute();
+
+  // check if user is able to level up
+  if (xpNeededToLevelUp <= newExperience) {
+    await userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ level: user.level + 1 })
+      .where({ userId })
+      .execute();
+
+    await userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ experiencePoints: newExperience % xpNeededToLevelUp })
+      .where({ userId })
+      .execute();
+  }
+
+  user = await getUserById(userId);
+
+  return user;
 }
 
 async function deleteUserById(userId: string): Promise<void> {
@@ -70,7 +113,9 @@ export {
   getUserByEmail,
   getUserById,
   getUserByUsername,
+  updateEmailVerification,
   updateEmailAddress,
+  awardXp,
   deleteUserById,
   deleteAllUsers,
 };

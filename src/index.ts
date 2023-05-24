@@ -10,7 +10,7 @@ import {
   logIn,
   getUserProfileData,
   findUser,
-  updateUserEmail,
+  verifyEmail,
   deleteAccount,
   renderMenu,
 } from './controllers/UserController.js';
@@ -57,7 +57,7 @@ app.get('/users/unfollow/:targetUserId', unfollowUser);
 app.get('/users/:targetUserId/following', renderFollowingPage);
 app.get('/users/:targetUserId/followers', renderFollowersPage);
 
-app.post('/api/users/:userId/email', updateUserEmail);
+app.get('/users/verify/:targetUserId', verifyEmail);
 app.post('/users/delete', deleteAccount);
 
 // DEBUG

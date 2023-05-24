@@ -13,3 +13,6 @@ type AuthRequest = {
   email: string;
   password: string;
 };
+
+// Rock Paper Scissors
+type RPSOptions = 'Rock' | 'Paper' | 'Scissors';

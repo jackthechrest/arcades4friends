@@ -13,6 +13,9 @@
 
     <% if (loggedIn && user.userId === authenticatedId) { %>
       <h1 class="big-text">Welcome to your profile page!</h1>
+      <% if (!user.verifiedEmail) { %>
+        <button class="btn-large"><a href = '/users/verify/<%= user.userId %>'>Verify Your Email</a></button>
+      <% } %>
     <% } else if (loggedIn) { %>
       <% if (following) { %>
         <div class="center-btn">
