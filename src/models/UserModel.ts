@@ -63,8 +63,29 @@ async function updateEmailAddress(userId: string, newEmail: string): Promise<voi
 
 async function awardXp(userId: string, xpAwarded: number): Promise<User> {
   let user = await getUserById(userId);
-  const xpNeededToLevelUp = user.level * 100;
-  const newExperience = user.experiencePoints + xpAwarded;
+  const xpToLevelUp = user.level * 100;
+  const buddyXpToLevelUp = user.level * 10000;
+
+  let newExperience = user.experiencePoints + xpAwarded;
+  let newBuddyExperience = user.buddyExperiencePoints + xpAwarded;
+
+  if (user.buddyLevel >= 10) {
+    newExperience = user.experiencePoints + xpAwarded * 2;
+    newBuddyExperience = user.buddyExperiencePoints + xpAwarded * 2;
+  }
+
+  let updatedXpCap = user.experienceForDay - newExperience;
+  let updatedBuddyXpCap = user.buddyExperienceForDay - newBuddyExperience;
+
+  if (updatedXpCap < 0) {
+    newExperience += updatedXpCap;
+    updatedXpCap = 0;
+  }
+
+  if (updatedBuddyXpCap < 0) {
+    newBuddyExperience += updatedBuddyXpCap;
+    updatedBuddyXpCap = 0;
+  }
 
   await userRepository
     .createQueryBuilder()
@@ -73,19 +94,45 @@ async function awardXp(userId: string, xpAwarded: number): Promise<User> {
     .where({ userId })
     .execute();
 
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ experienceForDay: updatedXpCap })
+    .where({ userId })
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ buddyExperiencePoints: newBuddyExperience })
+    .where({ userId })
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ buddyExperienceForDay: updatedBuddyXpCap })
+    .where({ userId })
+    .execute();
+
   // check if user is able to level up
-  if (xpNeededToLevelUp <= newExperience) {
+  if (xpToLevelUp <= newExperience) {
     await userRepository
       .createQueryBuilder()
       .update(User)
-      .set({ level: user.level + 1 })
+      .set({ level: user.level + 1, experiencePoints: newExperience % xpToLevelUp })
       .where({ userId })
       .execute();
+  }
 
+  if (buddyXpToLevelUp <= newBuddyExperience) {
     await userRepository
       .createQueryBuilder()
       .update(User)
-      .set({ experiencePoints: newExperience % xpNeededToLevelUp })
+      .set({
+        buddyLevel: user.buddyLevel + 1,
+        buddyExperiencePoints: newBuddyExperience % buddyXpToLevelUp,
+      })
       .where({ userId })
       .execute();
   }
@@ -93,6 +140,42 @@ async function awardXp(userId: string, xpAwarded: number): Promise<User> {
   user = await getUserById(userId);
 
   return user;
+}
+
+async function resetAllXpCaps(): Promise<void> {
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ experienceForDay: 1000, buddyExperienceForDay: 2000 })
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ experienceForDay: 1500 })
+    .where('buddyLevel >= 2')
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ experienceForDay: 2000 })
+    .where('buddyLevel >= 6')
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ buddyExperienceForDay: 2500 })
+    .where('buddyLevel >= 5')
+    .execute();
+
+  await userRepository
+    .createQueryBuilder()
+    .update(User)
+    .set({ buddyExperienceForDay: 3000 })
+    .where('buddyLevel >= 9')
+    .execute();
 }
 
 async function deleteUserById(userId: string): Promise<void> {
@@ -116,6 +199,7 @@ export {
   updateEmailVerification,
   updateEmailAddress,
   awardXp,
+  resetAllXpCaps,
   deleteUserById,
   deleteAllUsers,
 };

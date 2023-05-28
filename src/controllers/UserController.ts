@@ -208,19 +208,19 @@ async function deleteAccount(req: Request, res: Response): Promise<void> {
 
   const user = await getUserByEmail(email);
   if (!user) {
-    res.redirect('/users/PreviewPage'); // 404 Not Found - email doesn't exist
+    res.redirect('/users/menu'); // 404 Not Found - email doesn't exist
     return;
   }
 
   if (authenticatedUser.userId !== user.userId) {
-    res.redirect('/users/PreviewPage'); // trying to delete someone elses account
+    res.redirect('/users/menu'); // trying to delete someone elses account
     return;
   }
 
   const { passwordHash } = user;
 
   if (!(await argon2.verify(passwordHash, password))) {
-    res.redirect('/users/PreviewPage'); // 404 not found - user w/ email/password doesn't exist
+    res.redirect('/users/menu'); // 404 not found - user w/ email/password doesn't exist
   }
 
   await clearFollowsById(user.userId);
