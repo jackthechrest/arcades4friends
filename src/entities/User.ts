@@ -42,8 +42,17 @@ export class User {
   @OneToMany(() => Reply, (reply) => reply.author, { cascade: ['insert', 'update'] })
   replies: Relation<Reply>[];
 
+  @Column({ default: 0 })
+  numberOfMutes: number;
+
+  @Column({ default: 0 })
+  numberOfBans: number;
+
   // Games:
   // Little Buddy
+  @Column({ default: 'My Buddy' })
+  buddyName: string;
+
   @Column({ default: 1 })
   buddyLevel: number;
 
@@ -94,10 +103,10 @@ Level 1: None (Starting Point)
 Level 2: 500 XP added to User's Daily XP Cap (1000 -> 1500)
 Level 3: ~6 More Hours Added From Max Fuel to 0 Fuel (~12 -> ~18)
 Level 4: ~3 More Hours Added From Max Happiness to 0 Happiness (~12 -> ~15)
-Level 5: 500 XP added to Pet's Daily XP Cap (2000 -> 2500)
+Level 5: 500 XP added to Buddy's Daily XP Cap (2000 -> 2500)
 Level 6: 500 XP added to User's Daily XP Cap (1500 -> 2000)
 Level 7: ~6 More Hours Added From Max Fuel to 0 Fuel (~18 -> ~24)
 Level 8: ~3 More Hours Added From Max Happiness to 0 Happiness (~15 -> ~18)
-Level 9: 500 XP added to Pet's Daily XP Cap (2500 -> 3000)
+Level 9: 500 XP added to Buddy's Daily XP Cap (2500 -> 3000)
 Level 10: User XP Collection Rate Doubled (Max Level)
 */

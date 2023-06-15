@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Preview | arcades4friends</title>
+    <title>Menu | arcades4friends</title>
 
   </head>
   <body class="homepage">
@@ -21,6 +21,11 @@
       <li><a href = "/search" class = "btn btn-large">
         Search Users
       </a></li>
+      <% if (user.isOperator) { %>
+        <li><a href = "/punish" class = "btn btn-large">
+          Punish User
+        </a></li>
+      <% } %>
 
       <li><a href = "/delete" class = "btn btn-large">
         Delete Account
